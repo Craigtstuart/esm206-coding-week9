@@ -1,0 +1,88 @@
+---
+title: "Part 1 multiple linear regression"
+author: "Craig Stuart"
+date: "12/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(palmerpenguins)
+library(GGally)
+library(stargazer)
+```
+
+```{r}
+penguins %>% 
+  ggpairs()
+```
+
+```{r}
+penguins %>% 
+  select(species, bill_length_mm:body_mass_g) %>% #variables bill_length_mm **through** body_mass_g
+  ggpairs(aes(color = species))
+```
+
+## build a few different models (penguin mass as dependent variables)
+
+```{r}
+lm1 <- lm(body_mass_g~ flipper_length_mm + species, data = penguins)
+lm1
+
+lm2 <- lm(body_mass_g~ flipper_length_mm + species + sex, data = penguins)
+lm2
+
+lm3 <- lm(body_mass_g~ flipper_length_mm + species + sex + bill_length_mm, data = penguins)
+lm3
+
+lm4 <- lm(body_mass_g~ flipper_length_mm + species + sex + bill_length_mm + island, data = penguins)
+lm4
+```
+
+# Find the AIC value for each model 
+```{r}
+AIC(lm1)
+AIC(lm2) #increase in model fit (lower AIC) good added level (sex) of complexity
+AIC(lm3) # AIC down again (of these 4 models, lowest AIC value (lm3), based on this AIC value, this is best fit for model balance and model complexity)
+AIC(lm4) # WAIT. AIC increase (lower model fit, was not worth added complexity of island)
+```
+
+What is the model to show audience?
+
+## Use stargazer package for a table with multiple model outputs
+
+```{r, results= 'asis'}
+stargazer(lm1, lm3, lm4, type = "html")
+```
+
+## Omitted variable bias
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = bill_depth_mm)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm,
+                            y = bill_depth_mm,
+                            group = species)) +
+  geom_point(aes(color = species)) +
+  geom_smooth(method = 'lm')
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
